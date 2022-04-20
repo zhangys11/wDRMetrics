@@ -1,0 +1,10 @@
+MANIFEST.in
+README.md
+setup.py
+wDRMetrics/__init__.py
+wDRMetrics/run.py
+wDRMetrics.egg-info/PKG-INFO
+wDRMetrics.egg-info/SOURCES.txt
+wDRMetrics.egg-info/dependency_links.txt
+wDRMetrics.egg-info/requires.txt
+wDRMetrics.egg-info/top_level.txt
