@@ -7,7 +7,7 @@ setup(
     name="wDRMetrics",
     
     # Version number (initial):
-    version="0.0.1",
+    version="0.0.3",
     
     # Application author details:
     author="Zhang",
@@ -16,6 +16,8 @@ setup(
     # Packages
     packages=["wDRMetrics"],
     
+    package_dir={'wDRMetrics.templates': 'wDRMetrics/templates', 'wDRMetrics.static': 'wDRMetrics/static'},
+
     # Include additional files into the package
     include_package_data=True,
     
@@ -26,11 +28,12 @@ setup(
     license="LICENSE.txt",
     description="A GUI wrapper for pyDRMetrics. Rewritten using Flask.",
     
-    long_description=(pathlib.Path(__file__).parent / "README.md").read_text(),
+    # long_description=(pathlib.Path(__file__).parent / "README.md").read_text(),
     
     # Dependent packages (distributions)
     install_requires=[
         "flask",
+        "pyDRMetrics",
     ],
 )
 

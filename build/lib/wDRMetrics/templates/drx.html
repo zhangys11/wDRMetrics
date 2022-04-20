@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>wDRMetrics</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/bootstrap.css">
+    <script src="/static/jquery-3.3.1.min.js"></script>
+    <script src="/static/bootstrap.js"></script>
+    <script src="/static/jquery.blockUI.js"></script>
+    <script src="/static/jquery.form.min.js"></script>
+
+    <script>
+
+        function checkFileType(id) {
+            var filepath = $("input[name='" + id + "']").val();
+            var extStart = filepath.lastIndexOf(".");
+            var ext = filepath.substring(extStart, filepath.length).toUpperCase();
+            return ext == ".CSV";
+        }
+
+        $(function () {
+
+            $("#form-upload-file").submit(function () {
+
+                if (!checkFileType('X') || !checkFileType('Z')) {
+                    alert('Only support CSV file');
+                    return false;
+                }
+
+                // Xr is optional
+                if ($("input[name='" + "Xr" + "']").val() && !checkFileType('Xr')) {
+                    alert('Only support CSV file');
+                    return false;
+                }
+
+                $.blockUI({ message: '<h4>' + 'Analyzing' + '</h4>', fadeIn: 0 });
+            });
+
+            var options = {
+                type: 'POST',
+                success: function (obj) {
+                    // console.log(obj);
+                    if (obj && obj["html"]) {
+                        $('#dr_result').html(obj["html"]);
+                        $.unblockUI();
+                    }
+                    else if (obj) {
+                        $.unblockUI();
+                        alert(obj["message"]);
+                    }
+                    $.unblockUI();
+                }
+            };
+
+            $('#form-upload-file').ajaxForm(options);
+
+            $('#X').change(function () {
+                $('#XCover').val($(this).val());
+            });
+
+            $('#Z').change(function () {
+                $('#ZCover').val($(this).val());
+            });
+
+            $('#Xr').change(function () {
+                $('#XrCover').val($(this).val());
+            });
+        });
+
+    </script>
+
+    <style>
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        footer {
+            display: none;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div>
+        <br />
+        <div class="row p-2 m-2">
+            <div class="col-3">
+                <form id="form-upload-file" class="form-horizontal" action="/drx" method="post"
+                    enctype="multipart/form-data">
+                    <div class="card">
+                        <h5 class="card-header">Test User-Defined Algorithms</h5>
+                        <div class="card-body">
+                            <div>
+                                <a href="/static/X_Z_Xr.zip" class="fa fa-download"
+                                    title="A Raman spectroscopic dataset of 46 milk powder samples. This zip contains the 3 CSV files for X, Z and Xr."
+                                    style="font-style:italic">&nbsp; SampleData</a>
+                            </div>
+                            <br />
+
+                            <h6 onclick="$('#X').click();">Choose File X (before DR): </h6>
+                            <input type="file" name="X" id="X" style="display:none" />
+                            <input type="text" id="XCover" onclick="$('#X').click();" class="input-large"
+                                style="height:30px; min-width:270px;">
+
+                            <br /><br />
+
+                            <h6 onclick="$('#Z').click();">Choose File Z (after DR): </h6>
+                            <input type="file" name="Z" id="Z" style="display:none" />
+                            <input type="text" id="ZCover" onclick="$('#Z').click();" class="input-large"
+                                style="height:30px; min-width:270px;">
+
+                            <br /><br />
+
+                            <h6 onclick="$('#Xr').click();">Choose File Xr (reconstructed data): </h6>
+                            <input type="file" name="Xr" id="Xr" style="display:none" />
+                            <input type="text" id="XrCover" onclick="$('#Xr').click();" class="input-large"
+                                style="height:30px; min-width:270px;">
+
+                            <br /><br />
+
+                            <div class="btn-group">
+                                <input class="btn btn-default btn-outline-dark" type="submit" value="Submit" />
+                                <!--input class="btn btn-default btn-outline-dark" type="submit" value="Test with sample file" /-->
+                                
+                            </div>
+                            &nbsp;&nbsp;<a href="/">[Go Home]</a>
+                        </div>
+                    </div>
+                </form>
+
+                <br />
+
+                <div class="card">
+                    <h5 class="card-header">Quick Start Guide</h5>
+                    <div class="card-body" id="div_instruction">
+                        <table class="table table-light">
+                            <tbody>
+
+                                <tr>
+                                    <td>
+                                        1.
+                                        Develop your own DR algorithm and prepare the CSV data files in required format.
+                                        <br />
+                                        The first file is the original data X.
+                                        The second file is the data Z after DR.
+                                        The third file is the reconstructed data Xr.
+                                        The third file is optional.
+                                        <br />
+                                        The CSV files should have no headers.
+                                        Users can download the sample CSV file for reference.
+                                        <br />
+                                        The three files have the same row number. Z (as the result of DR) usually have
+                                        much fewer columns than X.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        2.
+                                        Click each file upload input box and choose the CSV file.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        3.
+                                        Click the "Submit" button. The server side will analyze the uploaded files with
+                                        pyDRMetrics.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        4.
+                                        The result from pyDRMetrics is returned by AJAX and rendered in the web page.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-9">
+                <div class="card">
+                    <h5 class="card-header">Result</h5>
+                    <div class="card-body">
+                        <div id="dr_result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

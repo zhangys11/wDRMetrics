@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>wDRMetrics</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/bootstrap.css">
+    <script src="/static/jquery-3.3.1.min.js"></script>
+    <script src="/static/bootstrap.js"></script>
+    <script src="/static/jquery.blockUI.js"></script>
+    <script src="/static/jquery.form.min.js"></script>
+
+    <script>
+        $(function () {
+
+            $("#form-upload-file").submit(function () {
+
+                // use sample dataset
+                var idx = $('#use_sample').val();
+                if (idx == 1 || idx == 2 || idx == 3) {
+                    $.blockUI({ message: '<h4>' + 'Analyzing' + '</h4>', fadeIn: 0 });
+                    return true;
+                }
+
+                var filepath = $("input[name='dataFile']").val();
+                var extStart = filepath.lastIndexOf(".");
+                var ext = filepath.substring(extStart, filepath.length).toUpperCase();
+                if (ext != ".CSV") {
+                    alert('Only support CSV file.');
+                    return false;
+                }
+
+                $.blockUI({ message: '<h4>' + 'Analyzing' + '</h4>', fadeIn: 0 });
+            });
+
+            var options = {
+                type: 'POST',
+                success: function (obj) {
+                    // console.log(obj);
+                    if (obj && obj["html"]) {
+                        $('#dr_result').html(obj["html"]);
+                        $.unblockUI();
+                    }
+                    else if (obj) {
+                        $.unblockUI();
+                        alert(obj["message"]);
+                    }
+                    $.unblockUI();
+                }
+            };
+
+            $('#form-upload-file').ajaxForm(options);
+
+            $('#dataFile').change(function () {
+                $('#dataFileCover').val($(this).val());
+            });
+        });
+
+        function analyzeSample(idx) {
+            $('#use_sample').val(idx);
+        }
+
+    </script>
+
+    <style>
+        
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        footer {
+            display: none;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div>
+        <br />
+        <div class="row p-2 m-2">
+            <div class="col-md-5 col-lg-4 col-xl-3">
+                <form id="form-upload-file" class="form-horizontal" action="/dr" method="post"
+                    enctype="multipart/form-data">
+                    <div class="card">
+                        <h5 class="card-header">Test Built-in Algorithms</h5>
+                        <div class="card-body">
+                            <h6>
+                                Select Algorithm
+                                <b class="badge badge-pill badge-dark">
+                                    <a class="font-weight-bold text-white" href="#modelBuiltinAlgorithms"
+                                        data-toggle="modal">Details</a>
+                                </b>
+                            </h6>
+                            <select id="dr" name="dr" class="form-control">
+                                <optgroup label="Choose a Built-in Algorithm">
+                                    <option value="PCA" selected="selected">PCA</option>
+                                    <option value="NMF">NMF</option>
+                                    <option value="RP">RP</option>
+                                    <option value="VQ">VQ</option>
+                                    <option value="MDS">MDS</option>
+                                    <option value="TSNE">t-SNE</option>
+                                    <option value="IDENTITY">Identity (perfect DR)</option>
+                                </optgroup>
+                            </select>
+
+                            <a href="/drx">[use your own algorithm]</a>
+                            <hr />
+
+                            <h6>
+                                Target Dimensionality <span class="font-italic font-weight-bold">k</span>
+                                <span id="k_label" class="badge badge-pill badge-secondary">3</span>
+                            </h6>
+                            <div class="row">
+                                <input type="range" min="1" max="100" value="3" class="slider"
+                                    oninput="$('#k_label').html(this.value);" id="n_components" name="n_components">
+                            </div>
+
+                            <br />
+
+                            <h6 onclick="$('#dataFile').click();">Upload Data File</h6>
+
+                            <input type="file" name="dataFile" id="dataFile" style="display:none" />
+                            <input type="text" id="dataFileCover" onclick="$('#dataFile').click();" class="input-large"
+                                style="height:30px; width: 100%; color: lightgray" value="click here to upload ...">
+
+                            <br />
+
+                            <div class="btn-group">
+                                <input class="btn btn-default btn-outline-dark" type="submit" value="Submit" />
+                                <!--input class="btn btn-default btn-outline-dark" type="submit" value="Test with sample file" /-->
+                            </div>
+
+                            <hr />
+                            <h6>
+                                Analyze a Sample Dataset
+                                <b class="badge badge-pill badge-dark">
+                                    <a class="font-weight-bold text-white" href="#modelDatasets"
+                                        data-toggle="modal">Details</a>
+                                </b>
+                            </h6>
+                            <input type="hidden" id = "use_sample" name="use_sample" value="0">
+                            
+                            <table class="">
+                                <tr>
+                                    <td>
+                                        <input type="submit" class="btn btn-link text-wrap"
+                                            onclick="analyzeSample(1);" value="1. Handwritten digits" />
+                                    </td>
+                                    <td>
+                                        <a href="/static/digits.csv" class="fa fa-download size-large"
+                                            title="MNIST hand-written digits dataset"></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="submit" class="btn btn-link text-wrap"
+                                            onclick="analyzeSample(2);" value="2. Raman spectra" />
+                                    </td>
+                                    <td>
+                                        <a href="/static/raman.csv" class="fa fa-download size-large"
+                                            title="a Raman spectroscopic dataset of 46 milk powder samples"></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="submit" class="btn btn-link text-wrap"
+                                            onclick="analyzeSample(3);" value="3. SELDI-TOF MS" />
+                                    </td>
+                                    <td>
+                                        <a href="/static/cancer.csv" class="fa fa-download size-large"
+                                            title="surface-enhanced laser desorption and ionization mass spectroscopy for ovarian cancer. This is a subset containing 10 normal and 10 cancer samples. Each sample has 15154 m/z features."></a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="card">
+                    <h5 class="card-header">Quick Start Guide</h5>
+                    <div class="card-body" id="div_instruction">
+
+                        <table class="table table-light">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        1.
+                                        From the dropdown list, select a built-in DR algorihm.
+                                        Click <b class="badge badge-pill badge-dark"><a
+                                                class="font-weight-bold text-white" href="#modelBuiltinAlgorithms"
+                                                data-toggle="modal">Details</a></b>
+                                        to learn more about the algorithms.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        2.
+                                        Set the target dimensionality <i>k</i>, i.e., how many dimensions to keep after
+                                        DR.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        3.
+                                        Click the file upload inputbox. Choose a valid CSV file. The CSV should have no
+                                        header row.
+                                        You can download a sample data file for reference.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        4.
+                                        Click the "Submit" button. The server side will do DR on the uploaded file and
+                                        analyze the DR quality with pyDRMetrics.
+                                        <br />
+                                        * You may also directly choose a sample dataset for analysis.
+                                        Click <b class="badge badge-pill badge-dark"><a
+                                                class="font-weight-bold text-white" href="#modelDatasets"
+                                                data-toggle="modal">Details</a></b>
+                                        to learn more about the datasets.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        5.
+                                        The result from pyDRMetrics is returned by AJAX and rendered in the web page.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7 col-lg-8 col-xl-9">
+                <div class="card">
+                    <h5 class="card-header">Result</h5>
+                    <div class="card-body">
+                        <div id="dr_result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modelBuiltinAlgorithms" tabindex="-1" role="dialog"
+        aria-labelledby="modelBuiltinAlgorithms" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Built-in algorithms</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <table class="table table-responsive">
+                            <tr>
+                                <th>Algorithm</th>
+                                <th>Description</th>
+                                <th>Implementation</th>
+                            </tr>
+                            <tr>
+                                <td>PCA</td>
+                                <td>Principal Component Analysis</td>
+                                <td>
+                                    <a target="_blank"
+                                        href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">
+                                        sklearn.decomposition.PCA
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>NMF</td>
+                                <td>Non-negative Matrix Factorization</td>
+                                <td>
+                                    <a target="_blank"
+                                        href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html">
+                                        sklearn.decomposition.NMF
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>RP</td>
+                                <td>Random Projection</td>
+                                <td>
+                                    <a target="_blank"
+                                        href="https://scikit-learn.org/stable/modules/generated/sklearn.random_projection.GaussianRandomProjection.html#sklearn.random_projection.GaussianRandomProjection">
+                                        sklearn.random_projection.GaussianRandomProjection
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>VQ</td>
+                                <td>Vector Quantization (by K-means)</td>
+                                <td>
+                                    <a target="_blank"
+                                        href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html">
+                                        sklearn.cluster.KMeans
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>MDS</td>
+                                <td>Multidimensional scaling</td>
+                                <td>
+                                    <a target="_blank"
+                                        href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html">
+                                        sklearn.manifold.MDS
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>t-SNE</td>
+                                <td>t-distributed Stochastic Neighbor Embedding</td>
+                                <td>
+                                    <a target="_blank"
+                                        href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html">
+                                        sklearn.manifold.TSNE
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Identity</td>
+                                <td>A "perfect" DR</td>
+                                <td>
+                                    X = Z = Xr
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modelDatasets" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sample Datasets</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <table class="table table-responsive">
+                            <tr>
+                                <th>Dataset</th>
+                                <th>Description</th>
+                                <th>Dimensions</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Handwritten digits
+
+                                    <a href="http://yann.lecun.com/exdb/mnist/" class="size-large"
+                                        target="_blank">http://yann.lecun.com/exdb/mnist/</a>
+                                </td>
+                                <td>
+                                    This is a subset of 40 grayscale image samples from the MNIST hand-written digits
+                                    dataset.
+                                    Each sample has 784(28x28) features/pixels.
+                                </td>
+                                <td>
+                                    40 × 784
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Raman spectra
+
+                                    <a href="https://doi.org/10.1016/j.talanta.2019.120681" target="_blank"
+                                        class="size-large">
+                                        10.1016/j.talanta.2019.120681
+                                    </a>
+                                </td>
+                                <td>
+                                    A Raman spectroscopic dataset of 46 milk powder samples.
+                                    Each sample has 2090 wavenumbers.
+                                </td>
+                                <td>
+                                    46 × 2090
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    SELDI-TOF MS
+
+                                    <a href="https://doi.org/10.1016/S0140-6736(02)07746-2" target="_blank"
+                                        class="size-large">
+                                        10.1016/S0140-6736(02)07746-2
+                                    </a>
+                                </td>
+                                <td>
+                                    surface-enhanced laser desorption and ionization mass spectroscopy for ovarian
+                                    cancer.
+                                    This is a subset containing 10 normal and 10 cancer samples.
+                                    Each sample has 15154 m/z features.
+                                </td>
+                                <td>
+                                    20 × 15154
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

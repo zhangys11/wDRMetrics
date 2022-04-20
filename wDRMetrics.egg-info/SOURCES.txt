@@ -1,3 +1,4 @@
+LICENCE
 MANIFEST.in
 README.md
 setup.py
@@ -8,3 +9,16 @@ wDRMetrics.egg-info/SOURCES.txt
 wDRMetrics.egg-info/dependency_links.txt
 wDRMetrics.egg-info/requires.txt
 wDRMetrics.egg-info/top_level.txt
+wDRMetrics/static/X_Z_Xr.zip
+wDRMetrics/static/bootstrap.css
+wDRMetrics/static/bootstrap.js
+wDRMetrics/static/cancer.csv
+wDRMetrics/static/digits.csv
+wDRMetrics/static/jquery-3.3.1.min.js
+wDRMetrics/static/jquery.blockUI.js
+wDRMetrics/static/jquery.form.min.js
+wDRMetrics/static/raman.csv
+wDRMetrics/static/raman_xr.csv
+wDRMetrics/static/raman_z.csv
+wDRMetrics/templates/dr.html
+wDRMetrics/templates/drx.html
